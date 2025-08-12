@@ -4,7 +4,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
                     <a href="/">
-                        <img src="{{ asset(path: 'mazer') }}/static/images/logo/logo.svg" alt="Logo">
+                        <span style="font-size: 20px">Net Logbook</span>
                     </a>
                 </div>
                 <div class="theme-toggle d-flex gap-2  align-items-center mt-2">
