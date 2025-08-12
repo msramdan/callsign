@@ -455,29 +455,6 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .header-logo img {
-                height: 80px;
-            }
-
-            .header-title {
-                padding: 10px 20px;
-            }
-
-            .header-title h1 {
-                font-size: 1.4rem;
-            }
-
-            .table th,
-            .table td {
-                padding: 12px 15px;
-            }
-
-            .badge {
-                padding: 6px 12px;
-                min-width: 80px;
-            }
-        }
 
         @media (max-width: 576px) {
             .container-box {
@@ -510,6 +487,23 @@
             .btn-download {
                 padding: 6px 15px;
                 font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-logo img {
+                height: 70px;
+                /* Ukuran lebih kecil untuk mobile */
+                margin-bottom: 10px;
+                /* Jarak bawah lebih kecil */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-logo img {
+                height: 60px;
+                /* Ukuran lebih kecil untuk perangkat sangat kecil */
+                margin-bottom: 8px;
             }
         }
     </style>
