@@ -221,7 +221,7 @@
                 </div>
                 <x-breadcrumb>
                     <li class="breadcrumb-item">
-                        <a href="/"><i class="fas fa-home me-1"></i>{{ __('Dashboard') }}</a>
+                        <a href="/dashboard"><i class="fas fa-home me-1"></i>{{ __('Dashboard') }}</a>
                     </li>
                     <li class="breadcrumb-item">
                         <a href="{{ route('events.index') }}">{{ __('Events') }}</a>

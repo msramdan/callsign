@@ -15,7 +15,7 @@
 
                 <x-breadcrumb>
                     <li class="breadcrumb-item">
-                        <a href="/">{{ __(key: 'Dashboard') }}</a>
+                        <a href="/dashboard">{{ __(key: 'Dashboard') }}</a>
                     </li>
                     <li class="breadcrumb-item">
                         <a href="{{ route(name: 'roles.index') }}">{{ __(key: 'Role') }}</a>
@@ -40,7 +40,7 @@
                                 @include('roles.include.form')
 
                                 <a href="{{ route(name: 'roles.index') }}" class="btn btn-secondary">{{ __(key: 'Back') }}</a>
-                                
+
                                 <button type="submit" class="btn btn-primary">{{ __(key: 'Update') }}</button>
                             </form>
                         </div>

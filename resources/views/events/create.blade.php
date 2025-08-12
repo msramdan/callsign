@@ -15,7 +15,7 @@
 
                 <x-breadcrumb>
                     <li class="breadcrumb-item">
-                        <a href="/">{{ __(key: 'Dashboard') }}</a>
+                        <a href="/dashboard">{{ __(key: 'Dashboard') }}</a>
                     </li>
                     <li class="breadcrumb-item">
                         <a href="{{ route(name: 'events.index') }}">{{ __(key: 'Events') }}</a>
@@ -28,12 +28,12 @@
         </div>
 
         <section class="section">
-            
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="card">
                         <div class="card-body">
-                            
+
 
                             <form action="{{ route(name: 'events.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
