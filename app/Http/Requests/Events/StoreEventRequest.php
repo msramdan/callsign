@@ -23,6 +23,7 @@ class StoreEventRequest extends FormRequest
             'nama_event' => 'required|string|max:255',
 			'tanggal_mulai' => 'required',
 			'tanggal_selesai' => 'required',
+            'kode_sertifikat' => 'required|max:100',
 			'template_sertifikat' => 'required|image|max:5000',
 			'nama_ncs' => 'required|string|max:150',
 			'callsign_ncs' => 'required|string|max:150',
@@ -30,3 +31,4 @@ class StoreEventRequest extends FormRequest
         ];
     }
 }
+

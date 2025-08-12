@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create(table: 'events', callback: function (Blueprint $table): void {
             $table->id();
             $table->string('nama_event', 255);
-			$table->dateTime('tanggal_mulai');
-			$table->dateTime('tanggal_selesai');
-			$table->string('template_sertifikat');
-			$table->string('nama_ncs', 150);
-			$table->string('callsign_ncs', 150);
-			$table->string('poster');
+            $table->dateTime('tanggal_mulai');
+            $table->dateTime('tanggal_selesai');
+            $table->string('kode_sertifikat', 100);
+            $table->string('template_sertifikat');
+            $table->string('nama_ncs', 150);
+            $table->string('callsign_ncs', 150);
+            $table->string('poster');
             $table->timestamps();
         });
     }

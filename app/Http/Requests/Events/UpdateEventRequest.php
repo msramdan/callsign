@@ -21,12 +21,13 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             'nama_event' => 'required|string|max:255',
-			'tanggal_mulai' => 'required',
-			'tanggal_selesai' => 'required',
-			'template_sertifikat' => 'nullable|image|max:5000',
-			'nama_ncs' => 'required|string|max:150',
-			'callsign_ncs' => 'required|string|max:150',
-			'poster' => 'nullable|image|max:5000',
+            'tanggal_mulai' => 'required',
+            'tanggal_selesai' => 'required',
+            'kode_sertifikat' => 'required|max:100',
+            'template_sertifikat' => 'nullable|image|max:5000',
+            'nama_ncs' => 'required|string|max:150',
+            'callsign_ncs' => 'required|string|max:150',
+            'poster' => 'nullable|image|max:5000',
         ];
     }
 }

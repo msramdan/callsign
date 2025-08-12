@@ -44,6 +44,7 @@
                                             <th>{{ __(key: 'Nama Event') }}</th>
                                             <th>{{ __(key: 'Tanggal Mulai') }}</th>
                                             <th>{{ __(key: 'Tanggal Selesai') }}</th>
+                                            <th>{{ __(key: 'Kode Sertifikat') }}</th>
                                             <th>{{ __(key: 'Template Sertifikat') }}</th>
                                             <th>{{ __(key: 'Nama Ncs') }}</th>
                                             <th>{{ __(key: 'Callsign Ncs') }}</th>
@@ -89,6 +90,10 @@
                 {
                     data: 'tanggal_selesai',
                     name: 'tanggal_selesai',
+                },
+                {
+                    data: 'kode_sertifikat',
+                    name: 'kode_sertifikat',
                 },
                 {
                     data: 'template_sertifikat',

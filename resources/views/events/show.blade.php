@@ -267,6 +267,12 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-muted">
+                                            {{ __('Kode Sertifikat') }}
+                                        </td>
+                                         <td class="fw-semibold">{{ $event->kode_sertifikat }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">
                                             {{ __('Template Sertifikat') }}
                                         </td>
                                         <td>
@@ -455,18 +461,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-                    // Load participants function
-            function loadParticipants() {
-                $.ajax({
-                    url: "{{ route('events.participants', $event->id) }}",
-                    method: "GET",
-                    success: function(res) {
-                        if (res.status === 'success' && res.data.length > 0) {
-                            $('#noParticipants').hide();
+        // Load participants function
+        function loadParticipants() {
+            $.ajax({
+                url: "{{ route('events.participants', $event->id) }}",
+                method: "GET",
+                success: function(res) {
+                    if (res.status === 'success' && res.data.length > 0) {
+                        $('#noParticipants').hide();
 
-                            let html = '';
-                            res.data.forEach(participant => {
-                                html += `
+                        let html = '';
+                        res.data.forEach(participant => {
+                            html += `
                                     <tr>
                                         <td>${participant.callsign}</td>
                                         <td>${participant.nama_peserta}</td>
@@ -479,23 +485,23 @@
                                         </td>
                                     </tr>
                                 `;
-                            });
-
-                            $('#participantsTable tbody').html(html);
-                        } else {
-                            $('#noParticipants').show();
-                            $('#participantsTable tbody').empty();
-                        }
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Gagal memuat daftar peserta'
                         });
+
+                        $('#participantsTable tbody').html(html);
+                    } else {
+                        $('#noParticipants').show();
+                        $('#participantsTable tbody').empty();
                     }
-                });
-            }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal memuat daftar peserta'
+                    });
+                }
+            });
+        }
 
 
         // Global function for deleting participants
