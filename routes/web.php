@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 // Default route ke landing page
 Route::get('/', [WebController::class, 'index']);
 Route::get('/get-peserta', [WebController::class, 'getPeserta'])->name('web.getPeserta');
+Route::get('/download-sertifikat', [WebController::class, 'downloadSertifikat'])->name('download.sertifikat');
 
 Route::middleware(['auth', 'web'])->group(function () {
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');

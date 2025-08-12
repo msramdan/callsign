@@ -551,7 +551,7 @@
 
             <div class="text-center">
                 @if ($lastEvent && $lastEvent->poster)
-                   <img src="{{ $lastEvent->poster }}" alt="Banner RAPI DIY" class="header-banner">
+                    <img src="{{ $lastEvent->poster }}" alt="Banner RAPI DIY" class="header-banner">
                 @endif
 
                 <h3 class="mt-3"
@@ -628,13 +628,17 @@
                     if (res.data.length > 0) {
                         res.data.forEach(item => {
                             tbody.innerHTML += `
-                                <tr>
-                                    <td><span class="badge">${item.callsign}</span></td>
-                                    <td><strong>${item.nama_peserta}</strong></td>
-                                    <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                                    <td>${item.nama_event}</td>
-                                </tr>
-                            `;
+        <tr>
+            <td><span class="badge">${item.callsign}</span></td>
+            <td><strong>${item.nama_peserta}</strong></td>
+            <td>
+                <button class="btn-download" onclick="downloadSertifikat(${item.id})">
+                    <i class="bi bi-download"></i> Unduh
+                </button>
+            </td>
+            <td>${item.nama_event}</td>
+        </tr>
+    `;
                         });
                     } else {
                         tbody.innerHTML = `
@@ -674,6 +678,42 @@
         function gotoPage(page) {
             currentPage = page;
             loadPeserta(page);
+        }
+    </script>
+    <script>
+        function downloadSertifikat(pesertaId) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass"></i> Memproses...';
+            button.disabled = true;
+
+            fetch(`/download-sertifikat?peserta_id=${pesertaId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw err;
+                        });
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `sertifikat_${pesertaId}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.error || 'Gagal mengunduh sertifikat');
+                })
+                .finally(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
         }
     </script>
 </body>

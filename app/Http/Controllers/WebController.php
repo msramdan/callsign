@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class WebController extends Controller
 {
@@ -26,7 +27,8 @@ class WebController extends Controller
                 'pesertas.nama_peserta',
                 'pesertas.nomor_sertifikat',
                 'events.nama_event',
-                'events.kode_sertifikat'
+                'events.kode_sertifikat',
+                'events.template_sertifikat'
             );
 
         if ($search) {
@@ -51,6 +53,47 @@ class WebController extends Controller
                 'next_page_url' => $pesertas->nextPageUrl(),
                 'prev_page_url' => $pesertas->previousPageUrl(),
             ]
+        ]);
+    }
+
+    public function downloadSertifikat(Request $request)
+    {
+        $pesertaId = $request->input('peserta_id');
+
+        // Ambil data peserta beserta event terkait
+        $peserta = DB::table('pesertas')
+            ->join('events', 'pesertas.event_id', '=', 'events.id')
+            ->where('pesertas.id', $pesertaId)
+            ->select(
+                'pesertas.callsign',
+                'pesertas.nama_peserta',
+                'pesertas.nomor_sertifikat',
+                'events.nama_event',
+                'events.kode_sertifikat',
+                'events.template_sertifikat'
+            )
+            ->first();
+
+        if (!$peserta) {
+            return response()->json(['error' => 'Peserta tidak ditemukan'], 404);
+        }
+
+        // Ekstrak nama file dari path URL
+        $templatePath = basename($peserta->template_sertifikat);
+        $fullPath = storage_path('app/public/template-sertifikats/' . $templatePath);
+
+        // Pastikan file template sertifikat ada
+        if (!file_exists($fullPath)) {
+            return response()->json(['error' => 'Template sertifikat tidak ditemukan'], 404);
+        }
+
+        // Generate nama file untuk sertifikat yang akan diunduh
+        $filename = "Sertifikat_{$peserta->kode_sertifikat}_{$peserta->nomor_sertifikat}_{$peserta->callsign}.jpg";
+
+        // Download file
+        return response()->download($fullPath, $filename, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
 }
