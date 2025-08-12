@@ -24,10 +24,10 @@ class UpdateEventRequest extends FormRequest
             'tanggal_mulai' => 'required',
             'tanggal_selesai' => 'required',
             'kode_sertifikat' => 'required|max:100',
-            'template_sertifikat' => 'nullable|image|max:5000',
+            'template_sertifikat' => 'nullable|image|max:8000',
             'nama_ncs' => 'required|string|max:150',
             'callsign_ncs' => 'required|string|max:150',
-            'poster' => 'nullable|image|max:5000',
+            'poster' => 'nullable|image|max:8000',
         ];
     }
 }

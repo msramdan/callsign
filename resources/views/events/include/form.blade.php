@@ -56,33 +56,6 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="row g-0">
-            <div class="col-md-5 text-center">
-                <img src="{{ $event?->template_sertifikat ?? 'https://placehold.co/300?text=No+Image+Available' }}"
-                    alt="Template Sertifikat" class="rounded img-fluid mt-1"
-                    style="object-fit: cover; width: 100%; height: 100px;" />
-            </div>
-            <div class="col-md-7">
-                <div class="form-group ms-3">
-                    <label for="template-sertifikat">{{ __(key: 'Template Sertifikat') }}</label>
-                    <input type="file" name="template_sertifikat"
-                        class="form-control @error('template_sertifikat') is-invalid @enderror" id="template-sertifikat"
-                        required>
-                    @error('template_sertifikat')
-                        <span class="text-danger">
-                            {{ $message }}
-                        </span>
-                    @enderror
-                    @isset($event)
-                        <div id="template-sertifikat-help-block" class="form-text">
-                            {{ __(key: 'Leave the template sertifikat blank if you don`t want to change it.') }}
-                        </div>
-                    @endisset
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
         <div class="form-group">
             <label for="nama-nc">{{ __(key: 'Nama Ncs') }}</label>
             <input type="text" name="nama_ncs" id="nama-nc"
@@ -113,8 +86,34 @@
     <div class="col-md-6">
         <div class="row g-0">
             <div class="col-md-5 text-center">
+                <img src="{{ $event?->template_sertifikat ?? 'https://placehold.co/300?text=No+Image+Available' }}"
+                    alt="Template Sertifikat" class="rounded img-fluid mt-1" style="width: 300px;" />
+            </div>
+            <div class="col-md-7">
+                <div class="form-group ms-3">
+                    <label for="template-sertifikat">{{ __(key: 'Template Sertifikat') }}</label>
+                    <input type="file" name="template_sertifikat"
+                        class="form-control @error('template_sertifikat') is-invalid @enderror" id="template-sertifikat"
+                        required>
+                    @error('template_sertifikat')
+                        <span class="text-danger">
+                            {{ $message }}
+                        </span>
+                    @enderror
+                    @isset($event)
+                        <div id="template-sertifikat-help-block" class="form-text">
+                            {{ __(key: 'Leave the template sertifikat blank if you don`t want to change it.') }}
+                        </div>
+                    @endisset
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="row g-0">
+            <div class="col-md-5 text-center">
                 <img src="{{ $event?->poster ?? 'https://placehold.co/300?text=No+Image+Available' }}" alt="Poster"
-                    class="rounded img-fluid mt-1" style="object-fit: cover; width: 100%; height: 100px;" />
+                    class="rounded img-fluid mt-1" style="width:300px;" />
             </div>
             <div class="col-md-7">
                 <div class="form-group ms-3">
