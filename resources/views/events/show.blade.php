@@ -300,13 +300,13 @@
                             </h6>
                         </div>
                         <div class="card-body">
-                            <form id="searchCallsignForm">
+                            <form id="searchCallsignForm" onsubmit="return false;">
                                 <div class="search-container">
                                     <div class="input-group">
                                         <input type="text" name="callsign" id="callsign" class="form-control"
                                             placeholder="Enter Callsign (e.g., JZ12APB)" autocomplete="off" required>
-                                        <button class="btn btn-search" type="submit">
-                                            <i class="fas fa-search"></i>
+                                        <button class="btn btn-search btn-primary" type="button" id="btnSearch">
+                                            <i class="fas fa-search"></i> Cari
                                         </button>
                                     </div>
                                     <div class="search-loader">
@@ -314,9 +314,10 @@
                                     </div>
                                 </div>
                             </form>
-
                             <div id="searchResult" class="search-result"></div>
                         </div>
+
+
                     </div>
 
                     {{-- List Peserta --}}
@@ -368,153 +369,106 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalPeserta" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Peserta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <tr>
+                            <td>Nama Peserta</td>
+                            <td id="pesertaNama"></td>
+                        </tr>
+                        <tr>
+                            <td>Provinsi</td>
+                            <td id="pesertaProvinsi"></td>
+                        </tr>
+                        <tr>
+                            <td>Callsign</td>
+                            <td id="pesertaCallsign"></td>
+                        </tr>
+                        <tr>
+                            <td>Masa Laku</td>
+                            <td id="pesertaMasaLaku"></td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td id="pesertaStatus"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Kembali</button>
+                    <button class="btn btn-primary">Tambahkan Peserta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#searchCallsignForm').on('submit', function(e) {
-                e.preventDefault();
-
+        $(function() {
+            function searchCallsign() {
                 const callsign = $('#callsign').val().trim().toUpperCase();
-                const $loader = $('.search-loader');
-                const $result = $('#searchResult');
-                const $submitBtn = $('.btn-search');
+                if (!callsign) return;
 
-                if (!callsign) {
-                    showError('Please enter a callsign');
-                    return;
-                }
-
-                // Show loading state
-                $loader.show();
-                $submitBtn.prop('disabled', true);
-                $result.empty();
-
-                // Make AJAX request
                 $.ajax({
-                    url: `https://iar-ikrap.postel.go.id/registrant/searchDataIar/`,
-                    method: 'GET',
+                    url: "{{ route('participants.search') }}",
+                    method: "GET",
                     data: {
                         callsign: callsign
                     },
-                    timeout: 10000,
-                    success: function(response) {
-                        handleSearchResponse(response, callsign);
+                    beforeSend: function() {
+                        $('.search-loader').show();
                     },
-                    error: function(xhr, status, error) {
-                        console.error('Search error:', error);
-                        if (status === 'timeout') {
-                            showError('Request timeout. Please try again.');
-                        } else {
-                            showError(
-                                'Connection error. Please check your internet connection and try again.'
-                                );
+                    success: function(res) {
+                        $('.search-loader').hide();
+                        if (res.status === 'not_found') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Tidak Ditemukan',
+                                text: 'Callsign ' + callsign + ' tidak ada di database IAR.',
+                                timer: 2500,
+                                showConfirmButton: false
+                            });
+                        } else if (res.status === 'success') {
+                            $('#pesertaNama').text(res.data['Nama Pemilik'] ?? '-');
+                            $('#pesertaProvinsi').text(res.data['Provinsi'] ?? '-');
+                            $('#pesertaCallsign').text(res.data['Tanda Panggilan'] ?? '-');
+                            $('#pesertaMasaLaku').text(res.data['Masa Laku'] ?? '-');
+                            $('#pesertaStatus').text(res.data['Status'] ?? '-');
+                            $('#modalPeserta').modal('show');
                         }
                     },
-                    complete: function() {
-                        $loader.hide();
-                        $submitBtn.prop('disabled', false);
+                    error: function() {
+                        $('.search-loader').hide();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal melakukan pencarian. Coba lagi.'
+                        });
                     }
                 });
+            }
+
+            // Klik tombol search
+            $('#btnSearch').on('click', function() {
+                console.log('sini');
+                searchCallsign();
             });
 
-            function handleSearchResponse(response, callsign) {
-                const $result = $('#searchResult');
-
-                // Check if response contains "not-found.png" or similar indicators
-                if (typeof response === 'string' &&
-                    (response.includes('not-found.png') || response.includes('text-center'))) {
-                    showNotFound(callsign);
-                    return;
-                }
-
-                // Check if response contains actual data
-                if (typeof response === 'string' && response.includes('none-style')) {
-                    parseAndDisplayResult(response);
-                } else {
-                    showNotFound(callsign);
-                }
-            }
-
-            function parseAndDisplayResult(htmlResponse) {
-                const $result = $('#searchResult');
-                const $temp = $('<div>').html(htmlResponse);
-                const $list = $temp.find('ul.none-style');
-
-                if ($list.length === 0) {
-                    showNotFound($('#callsign').val());
-                    return;
-                }
-
-                let resultHtml = '<div class="result-success">';
-                resultHtml += '<div class="d-flex align-items-center mb-3">';
-                resultHtml += '<i class="fas fa-check-circle fa-2x me-3"></i>';
-                resultHtml += '<div>';
-                resultHtml += '<h6 class="mb-0">Callsign Found!</h6>';
-                resultHtml += '<small class="opacity-75">Data retrieved from IAR Database</small>';
-                resultHtml += '</div>';
-                resultHtml += '</div>';
-
-                $list.find('li').each(function() {
-                    const $item = $(this);
-                    const $titleMeta = $item.find('.title-meta');
-                    const $metaDetails = $item.find('.meta-details');
-
-                    if ($titleMeta.length && $metaDetails.length) {
-                        const title = $titleMeta.text().trim();
-                        const value = $metaDetails.text().trim();
-
-                        resultHtml += '<div class="result-info-item">';
-                        resultHtml += `<div class="result-label">${title}</div>`;
-                        resultHtml += `<div class="result-value">${value}</div>`;
-                        resultHtml += '</div>';
-                    }
-                });
-
-                resultHtml += '</div>';
-
-                $result.html(resultHtml).hide().fadeIn(500);
-            }
-
-            function showNotFound(callsign) {
-                const $result = $('#searchResult');
-                const resultHtml = `
-            <div class="result-error">
-                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                <h6>Callsign Not Found</h6>
-                <p class="mb-0">The callsign <strong>${callsign}</strong> was not found in the IAR database.</p>
-                <small class="opacity-75 mt-2 d-block">Please check the spelling and try again.</small>
-            </div>
-        `;
-
-                $result.html(resultHtml).hide().fadeIn(500);
-            }
-
-            function showError(message) {
-                const $result = $('#searchResult');
-                const resultHtml = `
-            <div class="result-error">
-                <i class="fas fa-times-circle fa-2x mb-3"></i>
-                <h6>Search Error</h6>
-                <p class="mb-0">${message}</p>
-            </div>
-        `;
-
-                $result.html(resultHtml).hide().fadeIn(500);
-            }
-
-            // Auto-uppercase callsign input
-            $('#callsign').on('input', function() {
-                this.value = this.value.toUpperCase();
-            });
-
-            // Clear result when input is cleared
-            $('#callsign').on('keyup', function() {
-                if (!this.value.trim()) {
-                    $('#searchResult').fadeOut(300, function() {
-                        $(this).empty();
-                    });
+            // Tekan Enter di input
+            $('#callsign').on('keypress', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    searchCallsign();
                 }
             });
         });

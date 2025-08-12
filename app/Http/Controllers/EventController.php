@@ -10,6 +10,9 @@ use App\Generators\Services\ImageServiceV2;
 use Illuminate\Http\{JsonResponse, RedirectResponse};
 use Illuminate\Routing\Controllers\{HasMiddleware, Middleware};
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
+
 class EventController extends Controller implements HasMiddleware
 {
     public function __construct(public ImageServiceV2 $imageServiceV2, public string $templateSertifikatPath = 'template-sertifikats', public string $posterPath = 'posters', public string $disk = 'public')
@@ -125,16 +128,175 @@ class EventController extends Controller implements HasMiddleware
     }
 
 
-    public function verifyCallsign(Request $request)
+    /**
+     * Search callsign dari database IAR
+     */
+    public function searchCallsign(Request $request)
     {
-        $callsign = $request->input('callsign');
-        $url = "https://iar-ikrap.postel.go.id/registrant/searchDataIar/?callsign=" . urlencode($callsign);
+        $request->validate([
+            'callsign' => 'required|string|max:20'
+        ]);
+
+        $callsign = strtoupper(trim($request->callsign));
 
         try {
-            $response = file_get_contents($url);
-            return $response;
+            // Hit API external
+            $response = Http::timeout(10)->get('https://iar-ikrap.postel.go.id/registrant/searchDataIar/', [
+                'callsign' => $callsign
+            ]);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengakses database IAR'
+                ], 500);
+            }
+
+            $htmlResponse = $response->body();
+
+            // Cek apakah data tidak ditemukan
+            if (
+                strpos($htmlResponse, 'not-found.png') !== false ||
+                strpos($htmlResponse, 'text-center') !== false
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Callsign {$callsign} tidak ditemukan di database IAR"
+                ]);
+            }
+
+            // Parse HTML response untuk mendapatkan data
+            $data = $this->parseIarResponse($htmlResponse);
+
+            if (empty($data)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Callsign {$callsign} tidak ditemukan di database IAR"
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $data,
+                'message' => 'Data callsign berhasil ditemukan'
+            ]);
+        } catch (RequestException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Timeout atau gagal koneksi ke server IAR'
+            ], 408);
         } catch (\Exception $e) {
-            return '<div class="alert alert-danger">Error fetching data from the server.</div>';
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem'
+            ], 500);
         }
+    }
+
+    /**
+     * Parse HTML response dari API IAR
+     */
+    private function parseIarResponse($htmlResponse)
+    {
+        if (strpos($htmlResponse, 'none-style') === false) {
+            return null;
+        }
+
+        // Gunakan DOMDocument untuk parsing HTML
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($htmlResponse, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $xpath = new \DOMXPath($dom);
+        $listItems = $xpath->query('//ul[contains(@class, "none-style")]/li');
+
+        $data = [];
+
+        foreach ($listItems as $item) {
+            $titleElement = $xpath->query('.//div[contains(@class, "title-meta")]', $item);
+            $valueElement = $xpath->query('.//div[contains(@class, "meta-details")]', $item);
+
+            if ($titleElement->length > 0 && $valueElement->length > 0) {
+                $title = trim($titleElement->item(0)->textContent);
+                $value = trim($valueElement->item(0)->textContent);
+
+                // Clean up title - remove HTML tags and extra text
+                $title = preg_replace('/\s*\([^)]*\)\s*:\s*$/', '', $title);
+                $title = trim(str_replace(':', '', $title));
+
+                $data[$this->mapFieldName($title)] = $value;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Map field names dari IAR ke format yang konsisten
+     */
+    private function mapFieldName($title)
+    {
+        $mapping = [
+            'Nama Pemilik' => 'nama_pemilik',
+            'Provinsi' => 'provinsi',
+            'Tanda Panggilan' => 'callsign',
+            'Masa Laku' => 'masa_laku',
+            'Status' => 'status'
+        ];
+
+        return $mapping[$title] ?? strtolower(str_replace(' ', '_', $title));
+    }
+
+    /**
+     * Tambah peserta ke event
+     */
+    public function addParticipant(Request $request, $eventId)
+    {
+        $request->validate([
+            'callsign' => 'required|string|max:100',
+            'nama_peserta' => 'required|string|max:150'
+        ]);
+
+        $event = Event::findOrFail($eventId);
+
+        // Cek apakah peserta sudah terdaftar
+        $existingParticipant = $event->pesertas()
+            ->where('callsign', $request->callsign)
+            ->first();
+
+        if ($existingParticipant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Callsign sudah terdaftar sebagai peserta'
+            ]);
+        }
+
+        // Generate nomor sertifikat (customize sesuai kebutuhan)
+        $nomorSertifikat = $this->generateCertificateNumber($event, $request->callsign);
+
+        // Tambah peserta
+        $peserta = $event->pesertas()->create([
+            'callsign' => strtoupper($request->callsign),
+            'nama_peserta' => $request->nama_peserta,
+            'waktu_checkin' => now(),
+            'nomor_sertifikat' => $nomorSertifikat
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Peserta berhasil ditambahkan',
+            'data' => $peserta
+        ]);
+    }
+
+    /**
+     * Generate nomor sertifikat
+     */
+    private function generateCertificateNumber($event, $callsign)
+    {
+        $eventCode = strtoupper(substr($event->nama_event, 0, 3));
+        $year = date('Y');
+        $participantCount = $event->pesertas()->count() + 1;
+
+        return sprintf('%s-%s-%s-%04d', $eventCode, $year, $callsign, $participantCount);
     }
 }
