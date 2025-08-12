@@ -228,5 +228,5 @@ return [
                 'test view',
             ],
         ],
-    ],
-];
+  ['group' => 'events', 'access' => ['event view', 'event create', 'event edit', 'event delete']], 
+		],];

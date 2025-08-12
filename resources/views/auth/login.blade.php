@@ -10,11 +10,6 @@
     <div class="row h-100">
         <div class="col-lg-6 col-12">
             <div id="auth-left">
-                <div class="auth-logo">
-                    <a href="/">
-                        <img src="{{ asset(path: 'mazer') }}/static/images/logo/logo.svg" alt="Logo">
-                    </a>
-                </div>
                 <h1 class="auth-title">{{ __(key: 'Log in.') }}</h1>
                 <p class="auth-subtitle mb-3">{{ __(key: 'Log in with your data that you entered during registration.') }}</p>
 
@@ -67,6 +62,22 @@
 
                     <button class="btn btn-primary btn-block btn-lg shadow-lg mt-3">{{ __(key: 'Log in') }}</button>
                 </form>
+
+                <div class="text-center mt-4 text-lg fs-4">
+                    <p class="text-gray-600">{{ __(key: "Don't have an account") }}?
+                        <a href="/register" class="font-bold">
+                            {{ __(key: 'Sign up.') }}
+                        </a>
+                    </p>
+
+                    @if (Route::has(name: 'password.request'))
+                        <p>
+                            <a class="font-bold" href="{{ route(name: 'password.request') }}">
+                                {{ __(key: 'Forgot password') }}?
+                            </a>
+                        </p>
+                    @endif
+                </div>
             </div>
         </div>
 

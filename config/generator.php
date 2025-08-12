@@ -112,28 +112,30 @@ return [
      */
     'sidebars' => [
         [
-            'header' => 'Main',
-            'permissions' => ['test view'],
+            'header' => 'Events',
+            'permissions' => [
+                'event view',
+            ],
             'menus' => [
                 [
-                    'title' => 'Main Data',
-                    'icon' => '<i class="bi bi-collection-fill"></i>',
-                    'route' => null,
-                    'permission' => null,
-                    'permissions' => ['test view'],
-                    'submenus' => [
-                        [
-                            'title' => 'Tests',
-                            'route' => '/tests',
-                            'permission' => 'test view',
-                        ],
+                    'title'       => 'Events',
+                    'icon'        => '<i class="bi bi-calendar-event"></i>',
+                    'route'       => '/events',
+                    'permission'  => 'event view',
+                    'permissions' => [
+                        'event view',
                     ],
+                    'submenus'    => [],
                 ],
             ],
         ],
+
         [
             'header' => 'Users',
-            'permissions' => ['user view', 'role & permission view'],
+            'permissions' => [
+                'user view',
+                'role & permission view'
+            ],
             'menus' => [
                 [
                     'title' => 'Users',
@@ -141,7 +143,7 @@ return [
                     'route' => '/users',
                     'permission' => 'user view',
                     'permissions' => [],
-                    'submenus' => [],
+                    'submenus' => []
                 ],
                 [
                     'title' => 'Roles & permissions',
@@ -149,9 +151,9 @@ return [
                     'route' => '/roles',
                     'permission' => 'role & permission view',
                     'permissions' => [],
-                    'submenus' => [],
-                ],
-            ],
-        ],
-    ],
+                    'submenus' => []
+                ]
+            ]
+        ]
+    ]
 ];
