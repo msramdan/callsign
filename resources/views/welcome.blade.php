@@ -9,10 +9,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --primary-color: #e30613;
-            --secondary-color: #f8d64e;
-            --dark-color: #1a1a2e;
-            --light-color: #f8f9fa;
+            --primary-color: #2e7d32; /* Deep green */
+            --secondary-color: #81c784; /* Light green */
+            --accent-color: #ffb74d; /* Soft orange for accents */
+            --dark-color: #263238; /* Dark blue-gray */
+            --light-color: #f5f5f5; /* Light gray */
         }
 
         body {
@@ -21,7 +22,7 @@
             color: var(--dark-color);
             padding: 20px 0;
             background-image:
-                linear-gradient(135deg, rgba(227, 6, 19, 0.05) 0%, rgba(248, 214, 78, 0.05) 100%),
+                linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(129, 199, 132, 0.05) 100%),
                 url('https://images.unsplash.com/photo-1566438480900-0609be27a4be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1190&q=80');
             background-size: cover;
             background-attachment: fixed;
@@ -34,7 +35,7 @@
             margin: 30px auto;
             background-color: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             padding: 30px;
             border-top: 8px solid var(--primary-color);
@@ -55,7 +56,7 @@
             right: 0;
             width: 40%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(227, 6, 19, 0.05) 0%, rgba(248, 214, 78, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(129, 199, 132, 0.05) 100%);
             z-index: 0;
             clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
         }
@@ -82,7 +83,7 @@
             max-width: 700px;
             border-radius: 12px;
             margin: 0 auto 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             display: block;
             border: 3px solid white;
             transition: transform 0.3s, box-shadow 0.3s;
@@ -90,15 +91,15 @@
 
         .header-banner:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
         .table thead {
-            background: linear-gradient(90deg, var(--primary-color), #c00511);
+            background: linear-gradient(90deg, var(--primary-color), #1b5e20);
             color: white;
             position: sticky;
             top: 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .table th {
@@ -120,9 +121,9 @@
         }
 
         .table tbody tr:hover {
-            background-color: #ffeaea;
+            background-color: rgba(129, 199, 132, 0.1);
             transform: scale(1.005);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
         }
 
         .search-box {
@@ -137,14 +138,14 @@
             padding-left: 45px;
             border-radius: 25px;
             border: 2px solid #eee;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
             height: 45px;
             transition: all 0.3s;
         }
 
         .search-box input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 5px 15px rgba(227, 6, 19, 0.1);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.1);
         }
 
         .search-box i {
@@ -168,8 +169,8 @@
         }
 
         .btn-download {
-            background: linear-gradient(135deg, var(--secondary-color), #f0c926);
-            color: var(--dark-color);
+            background: linear-gradient(135deg, var(--secondary-color), #66bb6a);
+            color: white;
             border: none;
             padding: 8px 15px;
             border-radius: 8px;
@@ -180,10 +181,10 @@
         }
 
         .btn-download:hover {
-            background: linear-gradient(135deg, #f0c926, #e8c63d);
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-            color: #000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            color: white;
         }
 
         .btn-download i {
@@ -200,7 +201,7 @@
         .title-section h2 {
             font-weight: 700;
             color: var(--primary-color);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .title-section::after {
@@ -273,9 +274,9 @@
         }
 
         .header-title h1 {
-            font-weight: 800;
+            font-weight: 700;
             color: var(--primary-color);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
             position: relative;
             display: inline-block;
             padding: 0 20px;
@@ -307,6 +308,13 @@
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
+        .badge {
+            background-color: var(--primary-color);
+            font-weight: 500;
+            padding: 6px 10px;
+            min-width: 80px;
+        }
+
         @media (max-width: 768px) {
             .container-box {
                 padding: 20px;
@@ -321,6 +329,23 @@
             .table td {
                 padding: 8px 10px;
                 font-size: 0.85em;
+            }
+
+            .header-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .header-title h1::before,
+            .header-title h1::after {
+                width: 30px;
+            }
+
+            .header-title h1::before {
+                left: -40px;
+            }
+
+            .header-title h1::after {
+                right: -40px;
             }
         }
     </style>
@@ -364,25 +389,25 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="badge bg-danger">YB1ABC</span></td>
+                        <td><span class="badge">YB1ABC</span></td>
                         <td>John Doe</td>
                         <td>Net Kemerdekaan RI ke-78</td>
                         <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
                     </tr>
                     <tr>
-                        <td><span class="badge bg-danger">YB2DEF</span></td>
+                        <td><span class="badge">YB2DEF</span></td>
                         <td>Jane Smith</td>
                         <td>Net HUT RAPI DIY</td>
                         <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
                     </tr>
                     <tr>
-                        <td><span class="badge bg-danger">YB3GHI</span></td>
+                        <td><span class="badge">YB3GHI</span></td>
                         <td>Budi Santoso</td>
                         <td>Net Kemerdekaan RI ke-78</td>
                         <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
                     </tr>
                     <tr>
-                        <td><span class="badge bg-danger">YB4JKL</span></td>
+                        <td><span class="badge">YB4JKL</span></td>
                         <td>Ani Wijaya</td>
                         <td>Net Hari Radio Nasional</td>
                         <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
