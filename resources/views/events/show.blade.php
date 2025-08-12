@@ -411,13 +411,23 @@
 
 @endsection
 
-@push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('js')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(function() {
             function searchCallsign() {
                 const callsign = $('#callsign').val().trim().toUpperCase();
-                if (!callsign) return;
+                if (!callsign) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: 'Silakan masukkan callsign terlebih dahulu.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
 
                 $.ajax({
                     url: "{{ route('participants.search') }}",
@@ -426,50 +436,101 @@
                         callsign: callsign
                     },
                     beforeSend: function() {
+                        // Tampilkan loader
                         $('.search-loader').show();
+                        // Disable tombol search
+                        $('#btnSearch').prop('disabled', true).html(
+                            '<i class="fas fa-spinner fa-spin"></i> Mencari...');
                     },
                     success: function(res) {
-                        $('.search-loader').hide();
+                        console.log('Response:', res); // Debug log
+
                         if (res.status === 'not_found') {
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Tidak Ditemukan',
-                                text: 'Callsign ' + callsign + ' tidak ada di database IAR.',
+                                text: 'Callsign ' + callsign +
+                                    ' tidak ditemukan dalam database.',
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        } else if (res.status === 'success' && res.data) {
+                            console.log('Data found:', res.data);
+
+                            // Map data to view elements
+                            $('#pesertaNama').text(res.data.nama_pemilik || '-');
+                            $('#pesertaProvinsi').text(res.data.provinsi || '-');
+                            $('#pesertaCallsign').text(res.data.callsign || callsign);
+                            $('#pesertaMasaLaku').text(res.data.masa_laku || '-');
+                            $('#pesertaStatus').text(res.data.status || '-');
+
+                            // Tampilkan modal
+                            $('#modalPeserta').modal('show');
+                        } else {
+                            console.log('Unexpected response:', res);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Data Tidak Lengkap',
+                                text: 'Data ditemukan tetapi tidak lengkap.',
                                 timer: 2500,
                                 showConfirmButton: false
                             });
-                        } else if (res.status === 'success') {
-                            $('#pesertaNama').text(res.data['Nama Pemilik'] ?? '-');
-                            $('#pesertaProvinsi').text(res.data['Provinsi'] ?? '-');
-                            $('#pesertaCallsign').text(res.data['Tanda Panggilan'] ?? '-');
-                            $('#pesertaMasaLaku').text(res.data['Masa Laku'] ?? '-');
-                            $('#pesertaStatus').text(res.data['Status'] ?? '-');
-                            $('#modalPeserta').modal('show');
                         }
                     },
-                    error: function() {
-                        $('.search-loader').hide();
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', {
+                            xhr: xhr,
+                            status: status,
+                            error: error
+                        });
+
+                        let errorMessage = 'Gagal melakukan pencarian. Silakan coba lagi.';
+
+                        if (xhr.status === 422) {
+                            const response = xhr.responseJSON;
+                            errorMessage = response.message || errorMessage;
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+                        } else if (xhr.status === 0) {
+                            errorMessage =
+                                'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                        }
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Gagal melakukan pencarian. Coba lagi.'
+                            text: errorMessage
                         });
+                    },
+                    complete: function() {
+                        // Sembunyikan loader dan reset tombol
+                        $('.search-loader').hide();
+                        $('#btnSearch').prop('disabled', false).html(
+                            '<i class="fas fa-search"></i> Cari');
                     }
                 });
             }
 
-            // Klik tombol search
-            $('#btnSearch').on('click', function() {
-                console.log('sini');
+            // Event listener untuk tombol search
+            $('#btnSearch').on('click', function(e) {
+                e.preventDefault();
+                console.log('Search button clicked');
                 searchCallsign();
             });
 
-            // Tekan Enter di input
+            // Event listener untuk tekan Enter di input
             $('#callsign').on('keypress', function(e) {
-                if (e.which === 13) {
+                if (e.which === 13 || e.keyCode === 13) {
                     e.preventDefault();
+                    console.log('Enter key pressed');
                     searchCallsign();
                 }
+            });
+
+            // Event listener untuk input focus (opsional)
+            $('#callsign').on('focus', function() {
+                $('.search-loader').hide();
+                $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
             });
         });
     </script>
