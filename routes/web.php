@@ -17,4 +17,5 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::get('/participants/search', [ParticipantController::class, 'searchCallsign'])->name('participants.search');
     Route::post('/participants', [ParticipantController::class, 'store'])->name('participants.store');
     Route::get('/events/{event}/participants', [ParticipantController::class, 'getParticipants'])->name('events.participants');
+    Route::delete('/participants/{id}', [ParticipantController::class, 'destroy'])->name('participants.destroy');
 });

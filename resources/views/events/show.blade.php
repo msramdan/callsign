@@ -454,7 +454,56 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Global function for deleting participants
+        function deleteParticipant(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Peserta akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/participants/${id}`,
+                        method: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(res) {
+                            if (res.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil',
+                                    text: res.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                loadParticipants();
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: xhr.responseJSON?.message || 'Gagal menghapus peserta'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
         $(function() {
+            const eventId = {{ $event->id }};
+
+            // Load participants on page load
+            loadParticipants();
+
+            // Search callsign function
             function searchCallsign() {
                 const callsign = $('#callsign').val().trim().toUpperCase();
                 if (!callsign) {
@@ -475,38 +524,27 @@
                         callsign: callsign
                     },
                     beforeSend: function() {
-                        // Tampilkan loader
                         $('.search-loader').show();
-                        // Disable tombol search
                         $('#btnSearch').prop('disabled', true).html(
                             '<i class="fas fa-spinner fa-spin"></i> Mencari...');
                     },
                     success: function(res) {
-                        console.log('Response:', res); // Debug log
-
                         if (res.status === 'not_found') {
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Tidak Ditemukan',
-                                text: 'Callsign ' + callsign +
-                                    ' tidak ditemukan dalam database.',
+                                text: 'Callsign ' + callsign + ' tidak ditemukan dalam database.',
                                 timer: 3000,
                                 showConfirmButton: false
                             });
                         } else if (res.status === 'success' && res.data) {
-                            console.log('Data found:', res.data);
-
-                            // Map data to view elements
                             $('#pesertaNama').text(res.data.nama_pemilik || '-');
                             $('#pesertaProvinsi').text(res.data.provinsi || '-');
                             $('#pesertaCallsign').text(res.data.callsign || callsign);
                             $('#pesertaMasaLaku').text(res.data.masa_laku || '-');
                             $('#pesertaStatus').text(res.data.status || '-');
-
-                            // Tampilkan modal
                             $('#modalPeserta').modal('show');
                         } else {
-                            console.log('Unexpected response:', res);
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Data Tidak Lengkap',
@@ -516,25 +554,15 @@
                             });
                         }
                     },
-                    error: function(xhr, status, error) {
-                        console.error('AJAX Error:', {
-                            xhr: xhr,
-                            status: status,
-                            error: error
-                        });
-
+                    error: function(xhr) {
                         let errorMessage = 'Gagal melakukan pencarian. Silakan coba lagi.';
-
                         if (xhr.status === 422) {
-                            const response = xhr.responseJSON;
-                            errorMessage = response.message || errorMessage;
+                            errorMessage = xhr.responseJSON.message || errorMessage;
                         } else if (xhr.status === 500) {
                             errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
                         } else if (xhr.status === 0) {
-                            errorMessage =
-                                'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                            errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
                         }
-
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -542,45 +570,13 @@
                         });
                     },
                     complete: function() {
-                        // Sembunyikan loader dan reset tombol
                         $('.search-loader').hide();
-                        $('#btnSearch').prop('disabled', false).html(
-                            '<i class="fas fa-search"></i> Cari');
+                        $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
                     }
                 });
             }
 
-            // Event listener untuk tombol search
-            $('#btnSearch').on('click', function(e) {
-                e.preventDefault();
-                console.log('Search button clicked');
-                searchCallsign();
-            });
-
-            // Event listener untuk tekan Enter di input
-            $('#callsign').on('keypress', function(e) {
-                if (e.which === 13 || e.keyCode === 13) {
-                    e.preventDefault();
-                    console.log('Enter key pressed');
-                    searchCallsign();
-                }
-            });
-
-            // Event listener untuk input focus (opsional)
-            $('#callsign').on('focus', function() {
-                $('.search-loader').hide();
-                $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
-            });
-        });
-
-
-        $(function() {
-            const eventId = {{ $event->id }};
-
-            // Load participants on page load
-            loadParticipants();
-
-            // Add participant button click handler
+            // Add participant function
             $('#btnAddParticipant').on('click', function() {
                 const callsign = $('#pesertaCallsign').text();
                 const namaPeserta = $('#pesertaNama').text();
@@ -616,12 +612,8 @@
                                 timer: 2000,
                                 showConfirmButton: false
                             });
-
-                            // Close modal and refresh participants list
                             $('#modalPeserta').modal('hide');
                             loadParticipants();
-
-                            // Clear search field
                             $('#callsign').val('');
                         }
                     },
@@ -630,7 +622,6 @@
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             message = xhr.responseJSON.message;
                         }
-
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
@@ -638,13 +629,12 @@
                         });
                     },
                     complete: function() {
-                        $('#btnAddParticipant').prop('disabled', false).html(
-                            'Tambahkan Peserta');
+                        $('#btnAddParticipant').prop('disabled', false).html('Tambahkan Peserta');
                     }
                 });
             });
 
-            // Function to load participants
+            // Load participants function
             function loadParticipants() {
                 $.ajax({
                     url: "{{ route('events.participants', $event->id) }}",
@@ -656,13 +646,18 @@
                             let html = '';
                             res.data.forEach(participant => {
                                 html += `
-                            <tr>
-                                <td>${participant.callsign}</td>
-                                <td>${participant.nama_peserta}</td>
-                                <td>${participant.nomor_sertifikat}</td>
-                                <td>${new Date(participant.created_at).toLocaleString()}</td>
-                            </tr>
-                        `;
+                                    <tr>
+                                        <td>${participant.callsign}</td>
+                                        <td>${participant.nama_peserta}</td>
+                                        <td>${participant.nomor_sertifikat}</td>
+                                        <td>${new Date(participant.created_at).toLocaleString()}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteParticipant(${participant.id})">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
                             });
 
                             $('#participantsTable tbody').html(html);
@@ -680,6 +675,24 @@
                     }
                 });
             }
+
+            // Event listeners
+            $('#btnSearch').on('click', function(e) {
+                e.preventDefault();
+                searchCallsign();
+            });
+
+            $('#callsign').on('keypress', function(e) {
+                if (e.which === 13 || e.keyCode === 13) {
+                    e.preventDefault();
+                    searchCallsign();
+                }
+            });
+
+            $('#callsign').on('focus', function() {
+                $('.search-loader').hide();
+                $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
+            });
         });
     </script>
 @endpush

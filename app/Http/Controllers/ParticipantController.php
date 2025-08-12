@@ -73,39 +73,50 @@ class ParticipantController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi awal tanpa cek duplikat callsign
         $validator = Validator::make($request->all(), [
-            'event_id' => 'required|exists:events,id',
-            'callsign' => 'required|string|max:100',
-            'nama_peserta' => 'required|string|max:150',
+            'event_id'      => 'required|exists:events,id',
+            'callsign'      => 'required|string|max:100',
+            'nama_peserta'  => 'required|string|max:150',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
+        // Cek duplikat callsign
+        $exists = DB::table('pesertas')
+            ->where('event_id', $request->event_id)
+            ->where('callsign', strtoupper($request->callsign))
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Callsign ini sudah terdaftar untuk event ini.'
+            ], 409); // HTTP 409 Conflict
+        }
+
         try {
-            // Generate certificate number
+            // Generate nomor sertifikat
             $lastCertificate = DB::table('pesertas')
                 ->where('event_id', $request->event_id)
                 ->max('nomor_sertifikat');
 
-            $certificateNumber = 1;
-            if ($lastCertificate) {
-                $certificateNumber = (int) $lastCertificate + 1;
-            }
+            $certificateNumber = $lastCertificate ? ((int)$lastCertificate + 1) : 1;
 
             $participantId = DB::table('pesertas')->insertGetId([
-                'event_id' => $request->event_id,
-                'callsign' => strtoupper($request->callsign),
-                'nama_peserta' => $request->nama_peserta,
-                'waktu_checkin' => now(),
+                'event_id'         => $request->event_id,
+                'callsign'         => strtoupper($request->callsign),
+                'nama_peserta'     => $request->nama_peserta,
+                'waktu_checkin'    => now(),
                 'nomor_sertifikat' => str_pad($certificateNumber, 3, '0', STR_PAD_LEFT),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at'       => now(),
+                'updated_at'       => now(),
             ]);
 
             $participant = DB::table('pesertas')
@@ -113,16 +124,43 @@ class ParticipantController extends Controller
                 ->first();
 
             return response()->json([
-                'status' => 'success',
+                'status'  => 'success',
                 'message' => 'Peserta berhasil ditambahkan',
-                'data' => $participant
+                'data'    => $participant
             ]);
-
         } catch (\Exception $e) {
             \Log::error('Error adding participant', ['error' => $e->getMessage()]);
             return response()->json([
-                'status' => 'error',
+                'status'  => 'error',
                 'message' => 'Gagal menambahkan peserta'
+            ], 500);
+        }
+    }
+
+
+    public function destroy($id)
+    {
+        try {
+            $deleted = DB::table('pesertas')
+                ->where('id', $id)
+                ->delete();
+
+            if ($deleted) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Peserta berhasil dihapus'
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Peserta tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting participant', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal menghapus peserta'
             ], 500);
         }
     }
