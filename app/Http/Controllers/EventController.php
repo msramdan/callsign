@@ -9,7 +9,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Generators\Services\ImageServiceV2;
 use Illuminate\Http\{JsonResponse, RedirectResponse};
 use Illuminate\Routing\Controllers\{HasMiddleware, Middleware};
-
+use Illuminate\Http\Request;
 class EventController extends Controller implements HasMiddleware
 {
     public function __construct(public ImageServiceV2 $imageServiceV2, public string $templateSertifikatPath = 'template-sertifikats', public string $posterPath = 'posters', public string $disk = 'public')
@@ -121,6 +121,20 @@ class EventController extends Controller implements HasMiddleware
             return to_route(route: 'events.index')->with(key: 'success', value: __(key: 'The event was deleted successfully.'));
         } catch (\Exception $e) {
             return to_route(route: 'events.index')->with(key: 'error', value: __(key: "The event can't be deleted because it's related to another table."));
+        }
+    }
+
+
+    public function verifyCallsign(Request $request)
+    {
+        $callsign = $request->input('callsign');
+        $url = "https://iar-ikrap.postel.go.id/registrant/searchDataIar/?callsign=" . urlencode($callsign);
+
+        try {
+            $response = file_get_contents($url);
+            return $response;
+        } catch (\Exception $e) {
+            return '<div class="alert alert-danger">Error fetching data from the server.</div>';
         }
     }
 }
