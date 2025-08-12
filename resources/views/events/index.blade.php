@@ -45,9 +45,9 @@
                                             <th>{{ __(key: 'Tanggal Mulai') }}</th>
                                             <th>{{ __(key: 'Tanggal Selesai') }}</th>
                                             <th>{{ __(key: 'Kode Sertifikat') }}</th>
-                                            <th>{{ __(key: 'Template Sertifikat') }}</th>
                                             <th>{{ __(key: 'Nama Ncs') }}</th>
                                             <th>{{ __(key: 'Callsign Ncs') }}</th>
+                                            <th>{{ __(key: 'Template Sertifikat') }}</th>
                                             <th>{{ __(key: 'Poster') }}</th>
                                             <th>{{ __(key: 'Action') }}</th>
                                         </tr>
@@ -96,6 +96,14 @@
                     name: 'kode_sertifikat',
                 },
                 {
+                    data: 'nama_ncs',
+                    name: 'nama_ncs',
+                },
+                {
+                    data: 'callsign_ncs',
+                    name: 'callsign_ncs',
+                },
+                {
                     data: 'template_sertifikat',
                     name: 'template_sertifikat',
                     orderable: false,
@@ -105,14 +113,6 @@
                             <img src="${data}" alt="Template Sertifikat" style="width:100px"  />
                         </div>`;
                     }
-                },
-                {
-                    data: 'nama_ncs',
-                    name: 'nama_ncs',
-                },
-                {
-                    data: 'callsign_ncs',
-                    name: 'callsign_ncs',
                 },
                 {
                     data: 'poster',
