@@ -42,6 +42,12 @@
             backdrop-filter: blur(2px);
         }
 
+        .header-container {
+            position: relative;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
         .container-box::before {
             content: "";
             position: absolute;
@@ -62,7 +68,7 @@
         }
 
         .header-logo img {
-            width: 70%;
+            width: 60%;
             margin-bottom: 15px;
             transition: transform 0.3s;
         }
@@ -226,6 +232,81 @@
             margin-bottom: 10px;
         }
 
+        .header-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .header-decoration::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 100px;
+            height: 100px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        .header-decoration::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 80px;
+            height: 80px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        .header-title {
+            margin: 20px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .header-title h1 {
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: inline-block;
+            padding: 0 20px;
+        }
+
+        .header-title h1::before,
+        .header-title h1::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .header-title h1::before {
+            left: -60px;
+        }
+
+        .header-title h1::after {
+            right: -60px;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
         @media (max-width: 768px) {
             .container-box {
                 padding: 20px;
@@ -236,7 +317,8 @@
                 width: 100%;
             }
 
-            .table th, .table td {
+            .table th,
+            .table td {
                 padding: 8px 10px;
                 font-size: 0.85em;
             }
@@ -246,20 +328,27 @@
 
 <body>
     <div class="container-box">
-        <!-- Header dengan Logo -->
-        <div class="header-logo">
-            <img src="logo.png" alt="Logo RAPI DIY">
-        </div>
 
-        <!-- Header dengan Banner -->
-        <div class="text-center">
-            <img src="banner.jpg" alt="Banner RAPI DIY" class="header-banner">
+        <div class="header-container">
+            <div class="header-logo">
+                <img src="logo.png" alt="Logo RAPI DIY">
+            </div>
+
+            <div class="header-title">
+                <h1>RADIO ANTAR PENDUDUK INDONESIA</h1>
+                <div class="header-subtitle">DAERAH ISTIMEWA YOGYAKARTA</div>
+            </div>
+
+            <div class="text-center">
+                <img src="banner.jpg" alt="Banner RAPI DIY" class="header-banner">
+            </div>
         </div>
 
         <!-- Search Box -->
         <div class="search-box">
             <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" class="form-control" placeholder="Cari berdasarkan callsign, peserta, atau nama event...">
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Cari berdasarkan callsign, peserta, atau nama event...">
         </div>
 
         <!-- Table -->
