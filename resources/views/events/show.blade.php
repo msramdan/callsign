@@ -360,6 +360,7 @@
                                             <th>Nama Peserta</th>
                                             <th>No. Sertifikat</th>
                                             <th>Waktu Daftar</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -454,6 +455,49 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+                    // Load participants function
+            function loadParticipants() {
+                $.ajax({
+                    url: "{{ route('events.participants', $event->id) }}",
+                    method: "GET",
+                    success: function(res) {
+                        if (res.status === 'success' && res.data.length > 0) {
+                            $('#noParticipants').hide();
+
+                            let html = '';
+                            res.data.forEach(participant => {
+                                html += `
+                                    <tr>
+                                        <td>${participant.callsign}</td>
+                                        <td>${participant.nama_peserta}</td>
+                                        <td>${participant.nomor_sertifikat}</td>
+                                        <td>${new Date(participant.created_at).toLocaleString()}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteParticipant(${participant.id})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+
+                            $('#participantsTable tbody').html(html);
+                        } else {
+                            $('#noParticipants').show();
+                            $('#participantsTable tbody').empty();
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal memuat daftar peserta'
+                        });
+                    }
+                });
+            }
+
+
         // Global function for deleting participants
         function deleteParticipant(id) {
             Swal.fire({
@@ -475,6 +519,7 @@
                         },
                         success: function(res) {
                             if (res.status === 'success') {
+                                loadParticipants();
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Berhasil',
@@ -482,7 +527,6 @@
                                     timer: 2000,
                                     showConfirmButton: false
                                 });
-                                loadParticipants();
                             }
                         },
                         error: function(xhr) {
@@ -533,7 +577,8 @@
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Tidak Ditemukan',
-                                text: 'Callsign ' + callsign + ' tidak ditemukan dalam database.',
+                                text: 'Callsign ' + callsign +
+                                    ' tidak ditemukan dalam database.',
                                 timer: 3000,
                                 showConfirmButton: false
                             });
@@ -561,7 +606,8 @@
                         } else if (xhr.status === 500) {
                             errorMessage = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
                         } else if (xhr.status === 0) {
-                            errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                            errorMessage =
+                                'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
                         }
                         Swal.fire({
                             icon: 'error',
@@ -571,7 +617,8 @@
                     },
                     complete: function() {
                         $('.search-loader').hide();
-                        $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
+                        $('#btnSearch').prop('disabled', false).html(
+                            '<i class="fas fa-search"></i> Cari');
                     }
                 });
             }
@@ -629,52 +676,11 @@
                         });
                     },
                     complete: function() {
-                        $('#btnAddParticipant').prop('disabled', false).html('Tambahkan Peserta');
+                        $('#btnAddParticipant').prop('disabled', false).html(
+                            'Tambahkan Peserta');
                     }
                 });
             });
-
-            // Load participants function
-            function loadParticipants() {
-                $.ajax({
-                    url: "{{ route('events.participants', $event->id) }}",
-                    method: "GET",
-                    success: function(res) {
-                        if (res.status === 'success' && res.data.length > 0) {
-                            $('#noParticipants').hide();
-
-                            let html = '';
-                            res.data.forEach(participant => {
-                                html += `
-                                    <tr>
-                                        <td>${participant.callsign}</td>
-                                        <td>${participant.nama_peserta}</td>
-                                        <td>${participant.nomor_sertifikat}</td>
-                                        <td>${new Date(participant.created_at).toLocaleString()}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteParticipant(${participant.id})">
-                                                <i class="fas fa-trash"></i> Hapus
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `;
-                            });
-
-                            $('#participantsTable tbody').html(html);
-                        } else {
-                            $('#noParticipants').show();
-                            $('#participantsTable tbody').empty();
-                        }
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Gagal memuat daftar peserta'
-                        });
-                    }
-                });
-            }
 
             // Event listeners
             $('#btnSearch').on('click', function(e) {
