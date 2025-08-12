@@ -9,7 +9,7 @@ use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
 // Default route ke landing page
-Route::get('/', [WebController::class, 'index'])->name('home');
+Route::get('/', [WebController::class, 'index']);
 Route::get('/get-peserta', [WebController::class, 'getPeserta'])->name('web.getPeserta');
 
 Route::middleware(['auth', 'web'])->group(function () {

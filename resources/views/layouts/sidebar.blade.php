@@ -45,7 +45,7 @@
             <ul class="menu">
                 @auth
                     <li class="sidebar-item{{ request()->is(patterns: '/') || request()->is(patterns: 'dashboard') ? ' active' : '' }}">
-                        <a class="sidebar-link" href="/">
+                        <a class="sidebar-link" href="/dashboard">
                             <i class="bi bi-speedometer"></i>
                             <span> {{ __(key: 'Dashboard') }}</span>
                         </a>
