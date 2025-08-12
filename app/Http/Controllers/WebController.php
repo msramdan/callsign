@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -9,7 +10,8 @@ class WebController extends Controller
 {
     public function index()
     {
-        return view('welcome');
+        $lastEvent = Event::latest()->first();
+        return view('welcome', compact('lastEvent'));
     }
 
     public function getPeserta(Request $request)

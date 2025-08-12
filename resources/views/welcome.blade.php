@@ -550,7 +550,10 @@
             </div>
 
             <div class="text-center">
-                <img src="banner.jpg" alt="Banner RAPI DIY" class="header-banner">
+                @if ($lastEvent && $lastEvent->poster)
+                   <img src="{{ $lastEvent->poster }}" alt="Banner RAPI DIY" class="header-banner">
+                @endif
+
                 <h3 class="mt-3"
                     style="color: var(--primary-color); font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     LOGBOOK RAPIDA 12 DIY
