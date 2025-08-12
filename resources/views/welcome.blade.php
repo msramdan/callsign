@@ -506,6 +506,28 @@
                 margin-bottom: 8px;
             }
         }
+
+        .pagination .page-link {
+            border: 1px solid var(--secondary-color);
+            color: var(--primary-color);
+            padding: 6px 14px;
+            font-weight: 500;
+            margin: 0 2px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .pagination .page-link:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
     </style>
 </head>
 
@@ -558,17 +580,21 @@
                         </thead>
 
                         <tbody id="table-body">
-                            <!-- Data akan dimuat via AJAX -->
                         </tbody>
+                        <nav aria-label="Page navigation" class="mt-3">
+                            <ul class="pagination justify-content-center" id="pagination-links">
+                            </ul>
+                        </nav>
                     </table>
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div class="footer">
-                <p class="mb-1"><strong>Radio Antar Penduduk Indonesia Daerah Istimewa Yogyakarta</strong> &copy; 2025
-                </p>
-                <p class="text-muted small">Aplikasi pencatatan logbook Event 10.98 | Semangat Merdeka!</p>
+            <div class="mt-4 d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" id="pagination-links">
+                        <!-- Diisi oleh JS -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
