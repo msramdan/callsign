@@ -183,6 +183,29 @@
             background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
             color: white;
         }
+
+        #participantsTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #participantsTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid #e0e6ed;
+        }
+
+        #participantsTable td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e6ed;
+            vertical-align: middle;
+        }
+
+        #participantsTable tr:hover td {
+            background-color: #f8f9fa;
+        }
     </style>
 @endpush
 
@@ -329,12 +352,28 @@
                             </h6>
                         </div>
                         <div class="card-body">
-                            <div class="text-center text-muted">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="participantsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Callsign</th>
+                                            <th>Nama Peserta</th>
+                                            <th>No. Sertifikat</th>
+                                            <th>Waktu Daftar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Participants will be loaded here via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center mt-3" id="noParticipants">
                                 <i class="fas fa-user-plus fa-3x mb-3 opacity-25"></i>
-                                <p>{{ __('Participant management feature will be implemented here.') }}</p>
+                                <p>{{ __('Belum ada peserta yang terdaftar.') }}</p>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -403,7 +442,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Kembali</button>
-                    <button class="btn btn-primary">Tambahkan Peserta</button>
+                    <button class="btn btn-primary" id="btnAddParticipant">Tambahkan Peserta</button>
                 </div>
             </div>
         </div>
@@ -532,6 +571,115 @@
                 $('.search-loader').hide();
                 $('#btnSearch').prop('disabled', false).html('<i class="fas fa-search"></i> Cari');
             });
+        });
+
+
+        $(function() {
+            const eventId = {{ $event->id }};
+
+            // Load participants on page load
+            loadParticipants();
+
+            // Add participant button click handler
+            $('#btnAddParticipant').on('click', function() {
+                const callsign = $('#pesertaCallsign').text();
+                const namaPeserta = $('#pesertaNama').text();
+
+                if (callsign === '-' || namaPeserta === '-') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Data peserta tidak valid'
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('participants.store') }}",
+                    method: "POST",
+                    data: {
+                        event_id: eventId,
+                        callsign: callsign,
+                        nama_peserta: namaPeserta,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    beforeSend: function() {
+                        $('#btnAddParticipant').prop('disabled', true).html(
+                            '<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+                    },
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: 'Peserta berhasil ditambahkan',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
+                            // Close modal and refresh participants list
+                            $('#modalPeserta').modal('hide');
+                            loadParticipants();
+
+                            // Clear search field
+                            $('#callsign').val('');
+                        }
+                    },
+                    error: function(xhr) {
+                        let message = 'Gagal menambahkan peserta';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: message
+                        });
+                    },
+                    complete: function() {
+                        $('#btnAddParticipant').prop('disabled', false).html(
+                            'Tambahkan Peserta');
+                    }
+                });
+            });
+
+            // Function to load participants
+            function loadParticipants() {
+                $.ajax({
+                    url: "{{ route('events.participants', $event->id) }}",
+                    method: "GET",
+                    success: function(res) {
+                        if (res.status === 'success' && res.data.length > 0) {
+                            $('#noParticipants').hide();
+
+                            let html = '';
+                            res.data.forEach(participant => {
+                                html += `
+                            <tr>
+                                <td>${participant.callsign}</td>
+                                <td>${participant.nama_peserta}</td>
+                                <td>${participant.nomor_sertifikat}</td>
+                                <td>${new Date(participant.created_at).toLocaleString()}</td>
+                            </tr>
+                        `;
+                            });
+
+                            $('#participantsTable tbody').html(html);
+                        } else {
+                            $('#noParticipants').show();
+                            $('#participantsTable tbody').empty();
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal memuat daftar peserta'
+                        });
+                    }
+                });
+            }
         });
     </script>
 @endpush

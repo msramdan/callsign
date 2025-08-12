@@ -15,5 +15,6 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::resource('roles', App\Http\Controllers\RoleAndPermissionController::class);
     Route::resource('events', App\Http\Controllers\EventController::class);
     Route::get('/participants/search', [ParticipantController::class, 'searchCallsign'])->name('participants.search');
-
+    Route::post('/participants', [ParticipantController::class, 'store'])->name('participants.store');
+    Route::get('/events/{event}/participants', [ParticipantController::class, 'getParticipants'])->name('events.participants');
 });
