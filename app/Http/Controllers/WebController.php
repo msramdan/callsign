@@ -22,27 +22,33 @@ class WebController extends Controller
                 'pesertas.id',
                 'pesertas.callsign',
                 'pesertas.nama_peserta',
-                'pesertas.waktu_checkin',
                 'pesertas.nomor_sertifikat',
-                'pesertas.created_at',
                 'events.nama_event',
-                'events.tanggal_mulai',
-                'events.tanggal_selesai',
                 'events.kode_sertifikat'
             );
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('pesertas.callsign', 'like', "%{$search}%")
-                  ->orWhere('pesertas.nama_peserta', 'like', "%{$search}%")
-                  ->orWhere('pesertas.nomor_sertifikat', 'like', "%{$search}%")
-                  ->orWhere('events.nama_event', 'like', "%{$search}%");
+                    ->orWhere('pesertas.nama_peserta', 'like', "%{$search}%")
+                    ->orWhere('pesertas.nomor_sertifikat', 'like', "%{$search}%")
+                    ->orWhere('events.nama_event', 'like', "%{$search}%");
             });
         }
 
         $pesertas = $query->orderBy('pesertas.created_at', 'desc')
-                         ->paginate(10);
+            ->paginate(10);
 
-        return response()->json($pesertas);
+        return response()->json([
+            'data' => $pesertas->items(),
+            'pagination' => [
+                'total' => $pesertas->total(),
+                'per_page' => $pesertas->perPage(),
+                'current_page' => $pesertas->currentPage(),
+                'last_page' => $pesertas->lastPage(),
+                'next_page_url' => $pesertas->nextPageUrl(),
+                'prev_page_url' => $pesertas->previousPageUrl(),
+            ]
+        ]);
     }
 }

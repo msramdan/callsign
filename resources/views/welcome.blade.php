@@ -552,47 +552,13 @@
                             <tr>
                                 <th><i class="bi bi-broadcast me-2"></i>Callsign</th>
                                 <th><i class="bi bi-person me-2"></i>Peserta</th>
-                                <th><i class="bi bi-calendar-event me-2"></i>Nama Event</th>
                                 <th><i class="bi bi-file-earmark-text me-2"></i>Sertifikat</th>
+                                <th><i class="bi bi-calendar-event me-2"></i>Nama Event</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><span class="badge">YB1ABC</span></td>
-                                <td><strong>John Doe</strong></td>
-                                <td>Net Kemerdekaan RI ke-78</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge">YB2DEF</span></td>
-                                <td><strong>Jane Smith</strong></td>
-                                <td>Net HUT RAPI DIY</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge">YB3GHI</span></td>
-                                <td><strong>Budi Santoso</strong></td>
-                                <td>Net Kemerdekaan RI ke-78</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge">YB4JKL</span></td>
-                                <td><strong>Ani Wijaya</strong></td>
-                                <td>Net Hari Radio Nasional</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge">YB5MNO</span></td>
-                                <td><strong>Rudi Hermawan</strong></td>
-                                <td>Net Kemerdekaan RI ke-78</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
-                            <tr>
-                                <td><span class="badge">YB6PQR</span></td>
-                                <td><strong>Siti Rahayu</strong></td>
-                                <td>Net HUT RAPI DIY</td>
-                                <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
-                            </tr>
+
+                        <tbody id="table-body">
+                            <!-- Data akan dimuat via AJAX -->
                         </tbody>
                     </table>
                 </div>
@@ -609,51 +575,77 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Create floating particles
+        let searchTerm = '';
+        let currentPage = 1;
+
         document.addEventListener('DOMContentLoaded', function() {
-            const particlesContainer = document.getElementById('particles-js');
-            const particleCount = 30;
+            loadPeserta();
 
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-
-                // Random size between 1px and 3px
-                const size = Math.random() * 2 + 1;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-
-                // Random position
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.bottom = `-${size}px`;
-
-                // Random animation duration between 10s and 20s
-                const duration = Math.random() * 10 + 10;
-                particle.style.animationDuration = `${duration}s`;
-
-                // Random delay
-                particle.style.animationDelay = `${Math.random() * 10}s`;
-
-                particlesContainer.appendChild(particle);
-            }
-
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            const tableRows = document.querySelectorAll('#data-table tbody tr');
-
-            searchInput.addEventListener('keyup', function() {
-                const searchTerm = this.value.toLowerCase();
-
-                tableRows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+            // Search handler
+            document.getElementById('searchInput').addEventListener('keyup', function() {
+                searchTerm = this.value;
+                currentPage = 1; // reset ke page 1
+                loadPeserta();
             });
         });
+
+        function loadPeserta(page = 1) {
+            fetch(`/get-peserta?search=${encodeURIComponent(searchTerm)}&page=${page}`)
+                .then(res => res.json())
+                .then(res => {
+                    const tbody = document.getElementById('table-body');
+                    tbody.innerHTML = '';
+
+                    if (res.data.length > 0) {
+                        res.data.forEach(item => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td><span class="badge">${item.callsign}</span></td>
+                                    <td><strong>${item.nama_peserta}</strong></td>
+                                    <td><button class="btn-download"><i class="bi bi-download"></i> Unduh</button></td>
+                                    <td>${item.nama_event}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-3"></i><br>
+                                    Data tidak ditemukan
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    // Pagination
+                    const pagination = document.getElementById('pagination-links');
+                    pagination.innerHTML = '';
+
+                    if (res.pagination.last_page > 1) {
+                        if (res.pagination.prev_page_url) {
+                            pagination.innerHTML +=
+                                `<li class="page-item"><a class="page-link" href="#" onclick="gotoPage(${res.pagination.current_page - 1})">&laquo;</a></li>`;
+                        }
+                        for (let i = 1; i <= res.pagination.last_page; i++) {
+                            pagination.innerHTML += `
+                                <li class="page-item ${i === res.pagination.current_page ? 'active' : ''}">
+                                    <a class="page-link" href="#" onclick="gotoPage(${i})">${i}</a>
+                                </li>
+                            `;
+                        }
+                        if (res.pagination.next_page_url) {
+                            pagination.innerHTML +=
+                                `<li class="page-item"><a class="page-link" href="#" onclick="gotoPage(${res.pagination.current_page + 1})">&raquo;</a></li>`;
+                        }
+                    }
+                });
+        }
+
+        function gotoPage(page) {
+            currentPage = page;
+            loadPeserta(page);
+        }
     </script>
 </body>
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 // Default route ke landing page
 Route::get('/', [WebController::class, 'index'])->name('home');
-Route::get('/peserta/data', [WebController::class, 'getPeserta'])->name('peserta.data');
+Route::get('/get-peserta', [WebController::class, 'getPeserta'])->name('web.getPeserta');
 
 Route::middleware(['auth', 'web'])->group(function () {
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
