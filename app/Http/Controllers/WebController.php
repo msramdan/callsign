@@ -6,6 +6,8 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class WebController extends Controller
 {
@@ -23,6 +25,7 @@ class WebController extends Controller
             ->join('events', 'pesertas.event_id', '=', 'events.id')
             ->select(
                 'pesertas.id',
+                'pesertas.event_id',
                 'pesertas.callsign',
                 'pesertas.nama_peserta',
                 'pesertas.nomor_sertifikat',
@@ -56,16 +59,14 @@ class WebController extends Controller
         ]);
     }
 
-    public function downloadSertifikat(Request $request)
+    public function downloadSertifikat($eventId, $pesertaId)
     {
-        $pesertaId = $request->input('peserta_id');
-
-        // Ambil data peserta beserta event terkait
+        // 1. Ambil data peserta beserta event terkait
         $peserta = DB::table('pesertas')
             ->join('events', 'pesertas.event_id', '=', 'events.id')
             ->where('pesertas.id', $pesertaId)
+            ->where('events.id', $eventId)
             ->select(
-                'pesertas.callsign',
                 'pesertas.nama_peserta',
                 'pesertas.nomor_sertifikat',
                 'events.nama_event',
@@ -74,26 +75,42 @@ class WebController extends Controller
             )
             ->first();
 
+        // 2. Validasi jika peserta tidak ditemukan
         if (!$peserta) {
-            return response()->json(['error' => 'Peserta tidak ditemukan'], 404);
+            abort(404, 'Data Peserta atau Event tidak ditemukan.');
         }
 
-        // Ekstrak nama file dari path URL
-        $templatePath = basename($peserta->template_sertifikat);
-        $fullPath = storage_path('app/public/template-sertifikats/' . $templatePath);
-
-        // Pastikan file template sertifikat ada
-        if (!file_exists($fullPath)) {
-            return response()->json(['error' => 'Template sertifikat tidak ditemukan'], 404);
+        // 3. Validasi jika template sertifikat tidak ada
+        if (empty($peserta->template_sertifikat)) {
+            return back()->with('error', 'Template sertifikat untuk event ini belum diatur.');
         }
 
-        // Generate nama file untuk sertifikat yang akan diunduh
-        $filename = "Sertifikat_{$peserta->kode_sertifikat}_{$peserta->nomor_sertifikat}_{$peserta->callsign}.jpg";
+        // 4. Dapatkan path lokal dari URL template
+        $templateName = basename($peserta->template_sertifikat);
+        $templatePath = storage_path('app/public/template-sertifikats/' . $templateName);
 
-        // Download file
-        return response()->download($fullPath, $filename, [
-            'Content-Type' => 'image/jpeg',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
-        ]);
+        if (!file_exists($templatePath)) {
+            abort(404, 'File template sertifikat tidak ditemukan di server.');
+        }
+
+        // 5. Buat nomor sertifikat lengkap TANPA CALLSIGN (SESUAI REVISI)
+        $nomorLengkap = "{$peserta->nomor_sertifikat}.{$peserta->kode_sertifikat}";
+
+        // 6. Siapkan data untuk dikirim ke view
+        $data = [
+            'namaPeserta'     => $peserta->nama_peserta,
+            'nomorSertifikat' => $nomorLengkap,
+            'templatePath'    => $templatePath,
+        ];
+
+        // 7. Generate PDF dari view
+        $pdf = Pdf::loadView('sertifikat.download', $data)
+            ->setPaper('a4', 'landscape');
+
+        // 8. Buat nama file yang akan diunduh
+        $namaFile = 'Sertifikat-' . Str::slug($peserta->nama_event) . '-' . Str::slug($peserta->nama_peserta) . '.pdf';
+
+        // 9. Kirim PDF ke browser untuk diunduh
+        return $pdf->stream($namaFile);
     }
 }

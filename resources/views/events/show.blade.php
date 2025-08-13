@@ -269,7 +269,7 @@
                                         <td class="fw-bold text-muted">
                                             {{ __('Kode Sertifikat') }}
                                         </td>
-                                         <td class="fw-semibold">{{ $event->kode_sertifikat }}</td>
+                                        <td class="fw-semibold">{{ $event->kode_sertifikat }}</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-muted">
@@ -462,7 +462,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Load participants function
+        // Load participants function
         function loadParticipants() {
+            const eventId = {{ $event->id }}; // Ambil ID event untuk URL
             $.ajax({
                 url: "{{ route('events.participants', $event->id) }}",
                 method: "GET",
@@ -472,6 +474,7 @@
 
                         let html = '';
                         res.data.forEach(participant => {
+                            // UBAH BAGIAN INI
                             html += `
                                     <tr>
                                         <td>${participant.callsign}</td>
@@ -479,12 +482,16 @@
                                         <td>${participant.nomor_sertifikat}</td>
                                         <td>${new Date(participant.created_at).toLocaleString()}</td>
                                         <td>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteParticipant(${participant.id})">
+                                            <a href="/events/${eventId}/peserta/${participant.id}/download-sertifikat" target="_blank" class="btn btn-sm btn-success" title="Unduh Sertifikat">
+                                                <i class="fas fa-certificate"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteParticipant(${participant.id})" title="Hapus Peserta">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 `;
+                            // AKHIR PERUBAHAN
                         });
 
                         $('#participantsTable tbody').html(html);
