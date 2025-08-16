@@ -68,6 +68,7 @@ class WebController extends Controller
             ->where('events.id', $eventId)
             ->select(
                 'pesertas.nama_peserta',
+                'pesertas.callsign',
                 'pesertas.nomor_sertifikat',
                 'events.nama_event',
                 'events.kode_sertifikat',
@@ -99,6 +100,7 @@ class WebController extends Controller
         // 6. Siapkan data untuk dikirim ke view
         $data = [
             'namaPeserta'     => $peserta->nama_peserta,
+            'callsign'     => $peserta->callsign,
             'nomorSertifikat' => $nomorLengkap,
             'templatePath'    => $templatePath,
         ];

@@ -94,7 +94,7 @@
                     <label for="template-sertifikat">{{ __(key: 'Template Sertifikat') }}</label>
                     <input type="file" name="template_sertifikat"
                         class="form-control @error('template_sertifikat') is-invalid @enderror" id="template-sertifikat"
-                        required>
+                        {{ !isset($event) ? 'required' : '' }}>
                     @error('template_sertifikat')
                         <span class="text-danger">
                             {{ $message }}
@@ -119,7 +119,7 @@
                 <div class="form-group ms-3">
                     <label for="poster">{{ __(key: 'Poster') }}</label>
                     <input type="file" name="poster" class="form-control @error('poster') is-invalid @enderror"
-                        id="poster" required>
+                        id="poster" {{ !isset($event) ? 'required' : '' }}>
                     @error('poster')
                         <span class="text-danger">
                             {{ $message }}

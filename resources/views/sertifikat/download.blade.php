@@ -42,14 +42,14 @@
 
         .nama-peserta {
             position: absolute;
-            top: 275px;
+            top: 300px;
             left: 0;
             width: 100%;
             text-align: center;
-            font-size: 42px;
+            font-size: 20px;
             font-weight: bold;
             font-family: 'Times New Roman', Times, serif;
-            color: #696f7c;
+            color: black;
         }
     </style>
 </head>
@@ -62,7 +62,7 @@
 
     {{-- Nama Peserta --}}
     <div class="nama-peserta">
-        {{ $namaPeserta }}
+        {{ $namaPeserta }} - {{ $callsign }}
     </div>
 </body>
 
