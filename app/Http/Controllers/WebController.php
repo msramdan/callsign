@@ -69,6 +69,7 @@ class WebController extends Controller
             ->select(
                 'pesertas.nama_peserta',
                 'pesertas.nomor_sertifikat',
+                'pesertas.callsign', // Ambil callsign
                 'events.nama_event',
                 'events.kode_sertifikat',
                 'events.template_sertifikat'
@@ -93,12 +94,14 @@ class WebController extends Controller
             abort(404, 'File template sertifikat tidak ditemukan di server.');
         }
 
-        // 5. Buat nomor sertifikat lengkap TANPA CALLSIGN (SESUAI REVISI)
+        // 5. Buat nomor sertifikat
         $nomorLengkap = "{$peserta->nomor_sertifikat}.{$peserta->kode_sertifikat}";
 
-        // 6. Siapkan data untuk dikirim ke view
+        // 6. Siapkan data untuk dikirim ke view (GABUNGKAN NAMA DAN CALLSIGN)
+        $namaDanCallsign = "{$peserta->nama_peserta} - {$peserta->callsign}";
+
         $data = [
-            'namaPeserta'     => $peserta->nama_peserta,
+            'namaPeserta'     => $namaDanCallsign,
             'nomorSertifikat' => $nomorLengkap,
             'templatePath'    => $templatePath,
         ];
